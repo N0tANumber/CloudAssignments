@@ -23,6 +23,8 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
+import retrofit.client.Response;
+
 @Controller
 public class SpringController {
 
@@ -48,24 +50,28 @@ public class SpringController {
 	public @ResponseBody
 	VideoStatus setVideoData(@PathVariable(VideoSvcApi.ID_PARAMETER) long id,
 			@RequestParam(VideoSvcApi.DATA_PARAMETER) MultipartFile videoData,
-			HttpServletResponse response) {
-
-			
-			response.setStatus(HttpStatus.NOT_FOUND.value());
+			HttpServletResponse response) throws IOException {
 		
-			try {
+			if(videos.get(id)!=null){
 				videoDataMgr = VideoFileManager.get();
 				saveSomeVideo(videos.get(id), videoData);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				return new VideoStatus(VideoStatus.VideoState.READY);
+			}else{
+				response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 			}
 			
-		return new VideoStatus(VideoStatus.VideoState.READY);
+		return null;
 	}
 	
 	@RequestMapping(value= VideoSvcApi.VIDEO_DATA_PATH, method = RequestMethod.GET)
-	@ResponseBody Response getData(@PathVariable(VideoSvcApi.ID_PARAMETER) long id) {
+	@ResponseBody Response getData(@PathVariable(VideoSvcApi.ID_PARAMETER) long id,
+			HttpServletResponse response) throws IOException {
+		
+			if(videos.get(id)!=null){
+				serveSomeVideo(videos.get(id), response);
+			}else{
+				response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+			}
 		return null;
 	}
 
@@ -100,5 +106,14 @@ public class SpringController {
 			throws IOException {
 		videoDataMgr.saveVideoData(v, videoData.getInputStream());
 	}
+	
+	public void serveSomeVideo(Video v, HttpServletResponse response) throws IOException  {
+        // Of course, you would need to send some headers, etc. to the
+        // client too!
+        //  ...
+
+        videoDataMgr.copyVideoData(v, response.getOutputStream());
+
+   }
 
 }
