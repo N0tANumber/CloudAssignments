@@ -73,11 +73,11 @@ public class AnEmptyController {
 	// the Repository
 	@RequestMapping(value = VideoSvcApi.VIDEO_SVC_PATH, method = RequestMethod.POST)
 	public @ResponseBody
-	boolean addVideo(@RequestBody Video v) {
+	Video addVideo(@RequestBody Video v) {
 		// Initiate likes to 0 using the setter method of Video.java
 		v.setLikes(0);
 		videos.save(v);
-		return true;
+		return v;
 	}
 
 	// Receives GET requests to /video and returns the current
@@ -119,7 +119,7 @@ public class AnEmptyController {
 	@RequestMapping(value = VideoSvcApi.VIDEO_DURATION_SEARCH_PATH, method = RequestMethod.GET)
 	public @ResponseBody
 	Collection<Video> findByDurationLessThan(
-			@RequestParam(VideoSvcApi.VIDEO_DURATION_SEARCH_PATH) long duration) {
+			@RequestParam(VideoSvcApi.DURATION_PARAMETER) long duration) {
 		return videos.findByDurationLessThan(duration);
 	}
 
@@ -131,19 +131,20 @@ public class AnEmptyController {
 
 		if (videos.findOne(id) == null) {
 			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-		}
+		}else{
+			
+			Video v = videos.findOne(id);
+			Set<String> likesUsernames = v.getLikesUsernames();
 
-		Video v = videos.findOne(id);
-		Set<String> likesUsernames = v.getLikesUsernames();
-
-		if (likesUsernames.contains(p.getName())) {
-			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-		} else {
-			likesUsernames.add(p.getName());
-			v.setLikesUsernames(likesUsernames);
-			v.setLikes(likesUsernames.size());
-			videos.save(v);
-			response.setStatus(HttpServletResponse.SC_OK);
+			if (likesUsernames.contains(p.getName())) {
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			} else {
+				likesUsernames.add(p.getName());
+				v.setLikesUsernames(likesUsernames);
+				v.setLikes(likesUsernames.size());
+				videos.save(v);
+				response.setStatus(HttpServletResponse.SC_OK);
+			}
 		}
 	}
 
