@@ -50,27 +50,28 @@ public class SpringController {
 	VideoStatus setVideoData(@PathVariable(VideoSvcApi.ID_PARAMETER) long id,
 			@RequestParam(VideoSvcApi.DATA_PARAMETER) MultipartFile videoData,
 			HttpServletResponse response) throws IOException {
-		
-			if(videos.get(id)!=null){
-				videoDataMgr = VideoFileManager.get();
-				saveSomeVideo(videos.get(id), videoData);
-				return new VideoStatus(VideoStatus.VideoState.READY);
-			}else{
-				response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-			}
-			
+
+		if (videos.get(id) != null) {
+			videoDataMgr = VideoFileManager.get();
+			saveSomeVideo(videos.get(id), videoData);
+			return new VideoStatus(VideoStatus.VideoState.READY);
+		} else {
+			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+		}
+
 		return null;
 	}
-	
-	@RequestMapping(value= VideoSvcApi.VIDEO_DATA_PATH, method = RequestMethod.GET)
-	@ResponseBody Response getData(@PathVariable(VideoSvcApi.ID_PARAMETER) long id,
+
+	@RequestMapping(value = VideoSvcApi.VIDEO_DATA_PATH, method = RequestMethod.GET)
+	@ResponseBody
+	Response getData(@PathVariable(VideoSvcApi.ID_PARAMETER) long id,
 			HttpServletResponse response) throws IOException {
-		
-			if(videos.get(id)!=null){
-				serveSomeVideo(videos.get(id), response);
-			}else{
-				response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-			}
+
+		if (videos.get(id) != null) {
+			serveSomeVideo(videos.get(id), response);
+		} else {
+			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+		}
 		return null;
 	}
 
@@ -105,14 +106,15 @@ public class SpringController {
 			throws IOException {
 		videoDataMgr.saveVideoData(v, videoData.getInputStream());
 	}
-	
-	public void serveSomeVideo(Video v, HttpServletResponse response) throws IOException  {
-        // Of course, you would need to send some headers, etc. to the
-        // client too!
-        //  ...
 
-        videoDataMgr.copyVideoData(v, response.getOutputStream());
+	public void serveSomeVideo(Video v, HttpServletResponse response)
+			throws IOException {
+		// Of course, you would need to send some headers, etc. to the
+		// client too!
+		// ...
 
-   }
+		videoDataMgr.copyVideoData(v, response.getOutputStream());
+
+	}
 
 }
